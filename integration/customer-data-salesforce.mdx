@@ -1,0 +1,75 @@
+---
+title: "Salesforce Data Cloud"
+description: "Connect Salesforce Data Cloud to Lemrock"
+---
+
+Push segment activations from Salesforce Data Cloud to Lemrock via a **Webhook Data Action Target**.
+
+## Destination URL
+
+```
+POST https://api.lemrock.com/v1/cdp/salesforce/segment-updates
+```
+
+## Required Headers
+
+```
+Authorization: Bearer <LEMROCK_API_KEY>
+Content-Type: application/json
+```
+
+## Salesforce Setup
+
+1. Data Cloud → **Data Actions Target** → **New** → **Webhook**.
+2. Configure:
+   - **URL**: `https://api.lemrock.com/v1/cdp/salesforce/segment-updates`
+   - **Method**: `POST`
+   - **Headers**: `Authorization: Bearer <LEMROCK_API_KEY>`, `Content-Type: application/json`
+3. Create an **External Activation Target** or **Manual External Platform** if needed; link your segment activation to the webhook.
+
+## Field Mapping
+
+Map these fields:
+- `customer_id` (stable retailer customer ID)
+- `email_sha256` (lowercase email → SHA-256 → hex)
+- `segment_ids[]` (array of segment keys/codes)
+- Optional: `loyalty_tier`, `points_balance`
+
+## Payload Example
+
+```json
+{
+  "batch_id": "sf_dc_push_2025-11-07T16:20:00Z",
+  "records": [
+    {
+      "customer_id": "C12345",
+      "email_sha256": "d2c2a1...",
+      "segment_ids": ["SEG_ACTIVE_ELECTRONICS", "SEG_HIGH_VALUE"],
+      "loyalty_tier": "GOLD",
+      "points_balance": 12450
+    }
+  ]
+}
+```
+
+**Response**:
+
+```json
+{ "accepted": true, "processed": 1 }
+```
+
+## Identity Rules
+
+| Field            | Type          | Notes                           |
+| ---------------- | ------------- | ------------------------------- |
+| `customer_id`    | string        | Stable retailer customer ID (primary key)     |
+| `email_sha256`   | string        | Lowercase email → SHA-256 → hex |
+| `segment_ids[]`  | array\<string> | Segment keys/codes              |
+| `loyalty_tier`   | string        | e.g., `SILVER` / `GOLD`         |
+| `points_balance` | integer       | optional                        |
+
+- `email_sha256` = **SHA-256 of lowercase trimmed email**, hex
+- Use `customer_id` as primary key when available
+- Send **upserts** on join/attribute updates
+
+**References**: [Create Webhook Data Action](https://help.salesforce.com/s/articleView?id=sf.c360_a_create_webhook_data_action.htm) | [External Activation Target](https://help.salesforce.com/s/articleView?id=sf.c360_a_activate_to_external_platform.htm)

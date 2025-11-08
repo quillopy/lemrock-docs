@@ -1,0 +1,68 @@
+---
+title: "Generic CDP Webhook"
+description: "Connect any CDP platform to Lemrock via webhook"
+---
+
+Push customer segment data from your CDP platform to Lemrock via webhook.
+
+## Destination URL
+
+```
+POST https://api.lemrock.com/v1/cdp/webhook/segment-updates
+```
+
+## Required Headers
+
+```
+Authorization: Bearer <LEMROCK_API_KEY>
+Content-Type: application/json
+```
+
+## Webhook Configuration
+
+Configure your CDP platform to send POST requests to the endpoint above when segment memberships change.
+
+## Payload Format
+
+```json
+{
+  "source": "your-cdp-platform-name",
+  "timestamp": "2025-11-07T16:20:35Z",
+  "customers": [
+    {
+      "customer_id": "C12345",
+      "email_sha256": "d2c2a1...",
+      "segments": ["seg_high_value", "seg_active"],
+      "attributes": {
+        "loyalty_tier": "GOLD",
+        "points_balance": 12450
+      }
+    }
+  ]
+}
+```
+
+## Identity Keys
+
+Include at least one identifier per customer:
+- `customer_id` - Your internal customer ID
+- `email_sha256` - SHA-256 hash of lowercase trimmed email (hex format)
+
+## Response
+
+```json
+{ "accepted": true, "processed": 1 }
+```
+
+## Identity Rules
+
+| Field            | Type          | Notes                           |
+| ---------------- | ------------- | ------------------------------- |
+| `customer_id`    | string        | Stable retailer customer ID (primary key)     |
+| `email_sha256`   | string        | Lowercase email → SHA-256 → hex |
+| `segments[]`     | array\<string> | Segment IDs or names            |
+| `attributes`     | object        | Optional custom attributes      |
+
+- `email_sha256` = **SHA-256 of lowercase trimmed email**, hex
+- Use `customer_id` as primary key when available
+- `attributes` object can contain any custom fields relevant to your use case

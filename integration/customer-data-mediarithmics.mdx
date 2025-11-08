@@ -1,0 +1,77 @@
+---
+title: "Mediarithmics"
+description: "Connect Mediarithmics CDP to Lemrock"
+---
+
+Push user segment membership updates from Mediarithmics to Lemrock via an **Audience Segment Feed**.
+
+## Destination URL
+
+```
+POST https://api.lemrock.com/v1/cdp/mediarithmics/segment-updates
+```
+
+## Required Headers
+
+```
+Authorization: Bearer <LEMROCK_API_KEY>
+Content-Type: application/json
+```
+
+## Mediarithmics Setup
+
+1. In Mediarithmics, create an **Audience Segment Feed** (plugin) to push user membership updates to an external platform.
+2. Configure the destination:
+   - **URL**: `https://api.lemrock.com/v1/cdp/mediarithmics/segment-updates`
+   - **Header**: `Authorization: Bearer <LEMROCK_API_KEY>`
+   - **Method**: `POST`
+3. Choose **single-call** or **batch** mode per your volume; Mediarithmics monitors `/user_segment_update` plugin calls.
+
+## Identity Keys
+
+Use one or both:
+- `customer_id` (retailer ID)
+- `email_sha256` (lowercase hex)
+
+## Payload Example (Batch)
+
+```json
+{
+  "datamart_id": "dm_12345",
+  "segment_id": "seg_high_value_shoppers",
+  "op": "upsert",
+  "identities": [
+    { "customer_id": "C12345" },
+    { "email_sha256": "d2c2a1..." }
+  ],
+  "attributes": {
+    "loyalty_tier": "GOLD",
+    "lifetime_value_bucket": "HIGH"
+  },
+  "timestamp": "2025-11-07T16:20:35Z"
+}
+```
+
+**Operations**: `"upsert"` (add/update) or `"remove"` (segment exit)
+
+**Response**:
+
+```json
+{ "accepted": true, "processed": 2000, "segment_id": "seg_high_value_shoppers" }
+```
+
+## Identity Rules
+
+| Field            | Type          | Notes                           |
+| ---------------- | ------------- | ------------------------------- |
+| `customer_id`    | string        | Stable retailer customer ID (primary key)     |
+| `email_sha256`   | string        | Lowercase email → SHA-256 → hex |
+| `segment_ids[]`  | array\<string> | Segment keys/codes              |
+| `loyalty_tier`   | string        | e.g., `SILVER` / `GOLD`         |
+| `points_balance` | integer       | optional                        |
+
+- `email_sha256` = **SHA-256 of lowercase trimmed email**, hex
+- Use `customer_id` as primary key when available
+- Send **upserts** on join/attribute updates; send **remove** on segment exits
+
+**References**: [Audience Segment Feed](https://developer.mediarithmics.io/docs/export-data/audience-segment-feed) | [UserPoint/Segments APIs](https://developer.mediarithmics.io/docs/use-cases/audience-segment/export-data)

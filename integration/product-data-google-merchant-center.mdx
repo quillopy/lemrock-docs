@@ -1,0 +1,34 @@
+---
+title: "Google Merchant Center"
+description: "Sync product catalog via Google Merchant Center"
+---
+
+No code required on your side.
+
+## Required Inputs
+
+1. **Merchant Center ID** (`merchantId`)
+2. **Service account JSON** (or the service account email so you can add it as a user)
+3. Optional: country/language filters if you want a subset
+
+## Access Grant Steps
+
+1. In Google Cloud, create a **Service Account** and download the **JSON key**.
+2. In **Merchant Center → Settings → Account access**, **add the service account email** as a user (Standard or Admin per your policy).
+3. In Lemrock, configure:
+   - Merchant Center **`merchantId`**
+   - The **service account JSON** or confirm the SA email was added
+
+## Sync Behavior
+
+Lemrock will sync products via Content API (read-only):
+
+- `GET https://shoppingcontent.googleapis.com/content/v2.1/{merchantId}/products` (paginated)
+- Scope: `https://www.googleapis.com/auth/content`
+- Lemrock handles token refresh and incremental pulls
+
+## Field Alignment
+
+Product IDs in Merchant Center must match the IDs used with retail media platforms (Criteo, Mirakl Ads).
+
+**References**: [Google Merchant Center API](https://developers.google.com/merchant/api/overview) | [products.list](https://developers.google.com/shopping-content/reference/rest/v2.1/products)

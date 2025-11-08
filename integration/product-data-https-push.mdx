@@ -1,0 +1,88 @@
+---
+title: "HTTPS Push"
+description: "Push product catalog via HTTPS endpoint"
+---
+
+For organizations not using Google Merchant Center.
+
+## Endpoint
+
+```
+POST https://api.lemrock.com/v1/catalog/upload
+```
+
+## Required Headers
+
+```
+Authorization: Bearer <LEMROCK_API_KEY>
+Content-Type: application/json
+```
+
+or
+
+```
+Content-Type: text/csv
+```
+
+## Accepted Formats
+
+**JSON Example**:
+
+```json
+{
+  "products": [
+    {
+      "id": "SKU-123",
+      "title": "Wireless Headphones ABC",
+      "description": "Over-ear, ANC, 30h battery",
+      "price": {"value": 129.99, "currency": "USD"},
+      "availability": "in_stock",
+      "inventory_quantity": 52,
+      "brand": "ABC",
+      "category_path": ["Electronics", "Audio", "Headphones"],
+      "image_link": "https://cdn.example.com/img/sku-123.jpg",
+      "link": "https://www.example.com/p/sku-123",
+      "gtin": "0012345678905",
+      "mpn": "ABC-9000",
+      "item_group_id": "HEADPHONES-ABC"
+    }
+  ]
+}
+```
+
+**CSV Headers**:
+
+```csv
+id,title,description,price_value,price_currency,availability,inventory_quantity,brand,category_path,image_link,link,gtin,mpn,item_group_id
+```
+
+**Response**:
+
+```json
+{ "job_id": "cat_sync_2025-11-07T10:30:00Z", "accepted": true }
+```
+
+## Required Fields
+
+| Field                | Type              | Notes                                                        |
+| -------------------- | ----------------- | ------------------------------------------------------------ |
+| `id`                 | string            | Your SKU / offer ID (must match IDs used with Criteo/Mirakl) |
+| `title`              | string            |                                                              |
+| `description`        | string            |                                                              |
+| `price.value`        | number            |                                                              |
+| `price.currency`     | string (ISO 4217) |                                                              |
+| `availability`       | enum              | `in_stock`, `out_of_stock`, `preorder`, `backorder`          |
+| `inventory_quantity` | integer           |                                                              |
+| `brand`              | string            |                                                              |
+| `category_path[]`    | array\<string>     | Hierarchical categories                                      |
+| `image_link`         | URL               |                                                              |
+| `link`               | URL               | PDP                                                          |
+| `gtin`               | string            | optional                                                     |
+| `mpn`                | string            | optional                                                     |
+| `item_group_id`      | string            | optional (variants)                                          |
+
+Aligned with [Google product fields](https://support.google.com/merchants/answer/7052112).
+
+## Scheduling
+
+Start with **daily**, increase frequency if prices/stock change more often.

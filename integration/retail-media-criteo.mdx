@@ -1,0 +1,69 @@
+---
+title: "Criteo Retail Media"
+description: "Connect Criteo Retail Media Delivery API to Lemrock"
+---
+
+Lemrock integrates with Criteo Delivery API to fetch and display **sponsored products** in the chatbot.
+
+## Required Configuration
+
+Configure in Lemrock:
+- **Criteo partner ID** (`criteo-partner-id`)
+- **Region** for Delivery API (`eu`, `us`, or `as`)
+- **Page IDs** configured by your Criteo TAM (e.g., `viewSearchResult_API_desktop`)
+
+## Request Inputs
+
+Lemrock calls the Delivery API server-side with:
+- **Page type** (search, category, PDP)
+- **Keywords** or **category** (for search/browse pages)
+- **Visitor/user IDs** (anonymized visitor ID, optional customer ID)
+- **Optional organic items** (SKU list for dedup/reporting)
+
+**Example call (search)**:
+
+```
+GET https://d.us.criteo.com/delivery/retailmedia
+  ?criteo-partner-id=12345
+  &environment=p
+  &retailer-visitor-id=<anonymized-visitor-id>
+  &customer-id=<optional-retailer-user-id>
+  &page-id=viewSearchResult_API_desktop
+  &event-type=viewSearchResult
+  &keywords=wireless%20headphones
+  &item=SKU123|SKU456|SKU789
+```
+
+**References**: [Delivery API endpoints](https://developers.criteo.com/retail-media/docs/delivery-api-integration) | [Search page parameters](https://developers.criteo.com/retail-media/docs/delivery-api-parameters)
+
+## Returned Data
+
+Criteo returns:
+
+```json
+{
+  "status": "OK",
+  "placements": [
+    {
+      "viewSearchResult_API_desktop": [
+        {
+          "format": "sponsored_products",
+          "products": [
+            {
+              "ProductId": "SKU123",
+              "OnLoadBeacon": "//b.us5.us.criteo.com/rm?...",
+              "OnClickBeacon": "//b.us5.us.criteo.com/rm?...",
+              "OnViewBeacon": "//b.us5.us.criteo.com/rm?..."
+            }
+          ],
+          "rendering": ""
+        }
+      ]
+    }
+  ]
+}
+```
+
+Lemrock maps `ProductId` to your catalog SKU and displays sponsored products in the chatbot.
+
+**References**: [Delivery API response structure](https://developers.criteo.com/retail-media/docs/delivery-api-response)

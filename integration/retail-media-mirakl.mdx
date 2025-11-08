@@ -1,0 +1,26 @@
+---
+title: "Mirakl Ads"
+description: "Connect Mirakl Ads to Lemrock"
+---
+
+Mirakl Ads tenants expose retail-media capabilities for marketplace/retail assortments. Integration differs by tenant.
+
+## Criteo-Powered Setup
+
+If your Mirakl Ads stack is **Criteo-powered**, reuse the **Criteo Delivery API** setup with your Mirakl Ads configuration.
+
+No additional integration required.
+
+## Native Mirakl Ads Setup
+
+If using **native Mirakl Ads API** (not Criteo-powered):
+
+Configure in Lemrock:
+- **Tenant base URL** and **API key** ([Mirakl APIs use HTTPS + API key](https://developer.mirakl.net/))
+- The **Sponsored Products** retrieval endpoint & required params (from your Mirakl Ads tenant docs)
+
+## Display
+
+Lemrock fetches and displays sponsored products in the chatbot.
+
+**References**: [Mirakl Developer Portal](https://developer.mirakl.net/)
